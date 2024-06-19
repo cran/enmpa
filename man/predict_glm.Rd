@@ -7,8 +7,9 @@
 predict_glm(
   model,
   newdata,
-  clamping = FALSE,
-  var_to_clamp = NULL,
+  data = NULL,
+  extrapolation_type = "E",
+  restricted_vars = NULL,
   type = "response"
 )
 }
@@ -18,14 +19,22 @@ predict_glm(
 \item{newdata}{a data.frame or matrix with the new data to project the
 predictions.}
 
-\item{clamping}{(logical) whether to clamp values to a minimum and maximum
-value, that are established for the max and min values within calibration
-values. Default = FALSE.}
+\item{data}{data.frame or matrix of data used in the model calibration step.
+Default = NULL.}
 
-\item{var_to_clamp}{(character) a vector containing the names of the variables
-that will undergo clamping. By default, if no specific names are provided,
-the value is set to NULL, which indicates that clamping will be applied to
-all variables. Ignore if clamping = FALSE.}
+\item{extrapolation_type}{(character) to indicate extrapolation type of model.
+Models can be transferred with three options: free extrapolation ('E'),
+extrapolation with clamping ('EC'), and no extrapolation ('NE').
+Default = 'E'.}
+
+\item{restricted_vars}{(character) a vector containing the names of the
+variables that will undergo clamping or no extrapolation. For clamping,
+these variables are set to minimum and maximum values established for the
+max and min values within calibration values. For no extrapolation, the
+variables outside calibration limits became NA. If no specific names are
+provided, the value is set to NULL by default, indicating that clamping (EC)
+or no extrapolation (NE) will be applied to all variables. Ignore if
+extrapolation_type = 'E'.}
 
 \item{type}{(character) the type of prediction required. For a default
 binomial model the default predictions are of log-odds (probabilities on
@@ -47,6 +56,7 @@ data("sel_fit", package = "enmpa")
 env_vars <- terra::rast(system.file("extdata", "vars.tif", package = "enmpa"))
 
 # Prediction
-pred <- predict_glm(sel_fit$ModelID_7, newdata = env_vars)
+pred <- predict_glm(sel_fit$glms_fitted$ModelID_7, newdata = env_vars,
+                    data = sel_fit$data)
 terra::plot(pred)
 }

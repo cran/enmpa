@@ -55,9 +55,9 @@
 #' Default = TRUE
 #'
 #' @return
-#' A list containing: selected models, a summary of statistics for all models,
-#' results obtained in cross-validation for all models, original data used,
-#' weights, and data-partition indices used.
+#' An object of the class enmpa_calibration containing: selected models,
+#' a summary of statistics for all models, results obtained in cross-validation
+#' for all models, original data used, weights, and data-partition indices used.
 #'
 #' @details
 #' Model evaluation is done considering the ability to predict presences and
@@ -88,6 +88,8 @@
 #'                            response_type = "lpq", formula_mode = "moderate",
 #'                            selection_criterion = "TSS", cv_kfolds = 3,
 #'                            exclude_bimodal = TRUE, verbose = FALSE)
+#' print(cal_res)
+#' summary(cal_res)
 #'
 #' head(cal_res$calibration_results)
 #' head(cal_res$summary)
@@ -188,9 +190,8 @@ calibration_glm <- function(data, dependent, independent, weights = NULL,
     }
 
     # Final time
-    time.seq <- Sys.time() - start
     if (verbose == TRUE) {
-      message("\nRunning time: ", time.seq)
+      format_time(Sys.time() - start)
     }
 
   } else {
@@ -240,9 +241,8 @@ calibration_glm <- function(data, dependent, independent, weights = NULL,
     snow::stopCluster(cl)
 
     # Final time
-    time.seq <- Sys.time() - start
     if (verbose == TRUE) {
-      message("\nRunning time: ", time.seq)
+      format_time(Sys.time() - start)
     }
   }
 
@@ -274,7 +274,7 @@ calibration_glm <- function(data, dependent, independent, weights = NULL,
   data_final <- data.frame(data, kfold_ID = folds$kfold_ID)
 
   # Add ModelID tag
-  fx  <- unique(glm_res$Formulas)
+  fx  <- user_formulas
   mid <- data.frame(ModelID = paste0("ModelID_", 1:length(fx)), Formulas = fx)
 
   glm_res <- merge(glm_res, mid, by = "Formulas", sort = F)
@@ -288,10 +288,13 @@ calibration_glm <- function(data, dependent, independent, weights = NULL,
 
 
   # Final output
-  output <- list(selected = sel, summary = stats, calibration_results = glm_res,
-                 data = data_final, weights = weights,
-                 kfold_index_partition = data_partition)
-
+  output <- new_enmpa_calibration(
+    selected = sel,
+    summary = stats,
+    calibration_results = glm_res,
+    data = data_final,
+    weights = weights,
+    partitioned_data = data_partition)
 
   # Save calibration tables
   if (!is.null(out_dir) && is.character(out_dir)){

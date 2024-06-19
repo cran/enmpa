@@ -27,5 +27,5 @@ data("cal_res", package = "enmpa")
 all_res <- cal_res$calibration_results[, -1]
 
 # statistics for all evaluation results
-eval_stats <- evaluation_stats(all_res, bimodal_toexclude = TRUE)
+evaluation_stats(all_res, bimodal_toexclude = TRUE)
 }

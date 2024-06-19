@@ -4,24 +4,29 @@
 \alias{predict_selected}
 \title{Predictions for the models selected after calibration}
 \usage{
-predict_selected(fitted, newdata, clamping = FALSE, var_to_clamp = NULL,
-                 type = "response", consensus = TRUE)
+predict_selected(fitted, newdata, extrapolation_type = "E",
+                 restricted_vars = NULL, type = "response", consensus = TRUE)
 }
 \arguments{
-\item{fitted}{a list of GLMs obtained using the
-functions \code{\link{fit_selected}} or \code{\link{fit_glms}}.}
+\item{fitted}{an enmpa-class\verb{fitted models} object obtained using the
+functions \code{\link{fit_selected}}.}
 
 \item{newdata}{a \code{SpatRaster}, data.frame, or matrix with the new data on
 which to predict.}
 
-\item{clamping}{(logical) this option controls extrapolation when making
-predictions for environmental conditions beyond the calibration data.
-Default = FALSE.}
+\item{extrapolation_type}{(character) to indicate extrapolation type of model.
+Models can be transferred with three options: free extrapolation ('E'),
+extrapolation with clamping ('EC'), and no extrapolation ('NE').
+Default = 'E'.}
 
-\item{var_to_clamp}{(character) a vector containing the names of the variables
-that will undergo clamping. By default, if no specific names are provided,
-the value is set to NULL, which indicates that clamping will be applied to
-all variables. Ignore if clamping = FALSE.}
+\item{restricted_vars}{(character) a vector containing the names of the
+variables that will undergo clamping or no extrapolation. For clamping,
+these variables are set to minimum and maximum values established for the
+max and min values within calibration values. For no extrapolation, the
+variables outside calibration limits became NA. If no specific names are
+provided, the value is set to NULL by default, indicating that clamping (EC)
+or no extrapolation (NE) will be applied to all variables. Ignore if
+extrapolation_type = 'E'.}
 
 \item{type}{(character) the type of prediction required. For a default
 binomial model the default predictions are of log-odds (probabilities on
@@ -30,7 +35,7 @@ logit scale). The default, "response", returns predicted probabilities.}
 \item{consensus}{(logical) valid if \code{newdata} is a \code{SpatRaster}, whether to
 produce consensus results obtained by combining the predictions from the
 collection of selected models. By default consensuses are calculated using
-the mean, median, a weighted average using the AIC weights, and variance.
+the mean, median, variance, and weighted average using the AIC weights.
 Default = TRUE.}
 }
 \value{

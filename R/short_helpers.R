@@ -1,27 +1,8 @@
 # ------------------------------------------------------------------------------
 # Aux function to evaluate the Variable Contribution of the predictors
 #
-
-#to get deviance of a model after excluding predictors
-get_red_dev <- function(full_model, reduce_var) {
-  # initial tests
-  if (missing(full_model)) {
-    stop("Argument 'full_model' must be defined.")
-  }
-  if (missing(reduce_var)) {
-    stop("Argument 'reduce_var' must be defined.")
-  }
-
-  reduce_model <- suppressWarnings(
-    update(full_model, as.formula(paste("~.-", reduce_var)),
-           data = full_model$data)
-  )
-
-  return(deviance(reduce_model))
-}
-
 # get variable contribution for an individual model
-var_importance_ind <- function(model){
+var_importance_ind <- function(model, data = NULL, weights = NULL){
 
   # initial tests
   if (missing(model)) {
@@ -31,9 +12,13 @@ var_importance_ind <- function(model){
   # deviance of the full model
   dev_full <- deviance(model)
 
+  # preds names
+  pnames <- names(coef(model))[-1]
+
   # deviance of the reduced models
-  dev_reduction <- sapply(names(coef(model))[-1], function(x) {
-    dev_full - get_red_dev(model, x)
+  dev_reduction <- sapply(pnames, function(x) {
+    dev_full - get_red_dev(full_model = model, reduce_var = x, data = data,
+                           weights = weights)
   })
 
   deviance_importance <- dev_reduction / sum(dev_reduction)
@@ -51,6 +36,47 @@ var_importance_ind <- function(model){
   return(tab_contr)
 }
 
+#to get deviance of a model after excluding predictors
+get_red_dev <- function(full_model, reduce_var, data, weights = NULL) {
+  # initial tests
+  if (missing(full_model)) {
+    stop("Argument 'full_model' must be defined.")
+  }
+  if (missing(reduce_var)) {
+    stop("Argument 'reduce_var' must be defined.")
+  }
+  if (missing(data)) {
+    stop("Argument 'data' must be defined.")
+  }
+
+  # Ensure reduce_vars is a character vector
+  reduce_var <- as.character(reduce_var)
+
+  # Construct the reduced formula
+  reduced_formula_str <- paste("~ . -", paste(reduce_var, collapse = " - "))
+  reduced_formula <- as.formula(reduced_formula_str)
+
+  # Attempt to update the model with the new formula and data
+  reduce_model <- suppressWarnings(
+    update(object = full_model, formula = reduced_formula,
+           data = data, weights = weights)
+  )
+
+  return(deviance(reduce_model))
+}
+
+# Function to standardize interaction term names
+standardize_interaction_names <- function(names) {
+  sapply(names, function(name) {
+    # Split the name by ':', sort, and re-join
+    parts <- strsplit(name, ":")[[1]]
+    if(length(parts) > 1) {
+      return(paste(sort(parts), collapse = ":"))
+    } else {
+      return(name)
+    }
+  })
+}
 
 # ------------------------------------------------------------------------------
 # Aux function to calculate the Response Curves
@@ -59,12 +85,21 @@ var_importance_ind <- function(model){
 
 # aux function to get the individual response of a variable keeping constant
 # the others predictors
-response <- function(model, variable, n = 100, new_data = NULL,
+response <- function(model, variable, data = NULL, n = 100, new_data = NULL,
                      extrapolate = FALSE) {
 
   # initial tests
   if (missing(model) | missing(variable)) {
     stop("Argument 'model' or 'variable' must be defined.")
+  }
+
+  if (class(model)[1] == "glm" && is.null(try(model$data)) && is.null(data)) {
+    stop(paste0("The argument 'data' must be defined in case the model entered",
+                " does not explicitly include a data component."))
+  }
+
+  if (class(model)[1] == "glm" && !is.null(try(model$data))) {
+    data <- model$data
   }
 
   if (!is.null(new_data)) {
@@ -75,7 +110,7 @@ response <- function(model, variable, n = 100, new_data = NULL,
 
   # It gets only the variable names used in the fitted model
   vnames <- colSums(
-    sapply(colnames(model$data), grepl, names(coef(model)[-1]))
+    sapply(colnames(data), grepl, names(coef(model)[-1]))
     ) > 0
 
   if (any(!variable %in% names(vnames))) {
@@ -83,7 +118,7 @@ response <- function(model, variable, n = 100, new_data = NULL,
   }
 
   # Extract calibration data from the model object
-  cal_data <- model$data[, vnames]
+  cal_data <- data[, vnames]
 
   # Extract the limits of the calibration data
   cal_maxs <-  apply(cal_data, 2, FUN = max)
@@ -136,13 +171,22 @@ response <- function(model, variable, n = 100, new_data = NULL,
 
 
 # Response curve for a single model
-response_curve_ind <- function(model, variable, n = 100, new_data = NULL,
-                               extrapolate = FALSE, xlab = NULL, ylab = NULL,
-                               col = NULL, ...) {
+response_curve_ind <- function(model, variable, data = NULL, n = 100,
+                               new_data = NULL, extrapolate = FALSE,
+                               xlab = NULL, ylab = NULL, col = NULL, ...) {
 
   # initial tests
   if (missing(model) | missing(variable)) {
     stop("Argument 'model' or 'variable' must be defined.")
+  }
+
+  if (class(model)[1] == "glm" && is.null(try(model$data)) && is.null(data)) {
+    stop(paste0("The argument 'data' must be defined in case the model entered",
+                " does not explicitly include a data component."))
+  }
+
+  if (class(model)[1] == "glm" && !is.null(try(model$data))) {
+    data <- model$data
   }
 
   if (!is.null(new_data)) {
@@ -152,13 +196,16 @@ response_curve_ind <- function(model, variable, n = 100, new_data = NULL,
   }
 
 
-  response_out <- response(model = model, variable = variable, n = n,
-                           extrapolate = extrapolate, new_data = new_data)
+  response_out <- response(model = model, variable = variable, data = data,
+                           n = n, extrapolate = extrapolate,
+                           new_data = new_data)
 
-  limits <- range(model$data[,variable])
+  limits <- range(data[, variable])
 
   ## Plotting curve
   # Create a list of arguments to pass to the plot function
+  if (is.null(xlab)) {xlab <- variable}
+
   plotcurve_args <- list(x = response_out[, variable],
                          y = response_out$predicted,
                          type = "l",
@@ -178,9 +225,9 @@ response_curve_ind <- function(model, variable, n = 100, new_data = NULL,
 }
 
 # Consensus response curve
-response_curve_cons <- function(model, variable, n = 100, extrapolate = FALSE,
-                                new_data = NULL, xlab = NULL, ylab = NULL,
-                                col = NULL, ...) {
+response_curve_cons <- function(model, variable, data = NULL, n = 100,
+                                new_data = NULL, extrapolate = FALSE,
+                                xlab = NULL, ylab = NULL, col = NULL, ...) {
 
   # initial tests
   if (missing(model) | missing(variable)) {
@@ -199,25 +246,29 @@ response_curve_cons <- function(model, variable, n = 100, extrapolate = FALSE,
     lapply(model, function(x){
 
       # It gets only the variable names used in the fitted model
-      vnames <- colSums(sapply(colnames(x$data), grepl, names(coef(x)[-1]))) > 0
+      vnames <- colSums(sapply(colnames(data), grepl, names(coef(x)[-1]))) > 0
 
       if (any(!variable %in% names(vnames))) {
         stop("The name of the 'variable' was not defined correctly.")
       }
 
-      coefs <- coef(x)[-1]
-      variable_q <- c(variable, paste0("I(", variable,"^2)")) # find the quadratic too
+      coefs <- names(coef(x)[-1])
+      c1 <- any(c(variable, paste0("I(", variable, "^2)")) %in% coefs)
+      c2 <- any(grepl(paste0("^", variable, ":"), coefs))
+      c3 <- any(grepl(paste0(":", variable, "$"), coefs))
 
-      if ( sum(variable_q %in% names(coefs))){
-        x <- response(x, variable, new_data = new_data, extrapolate = extrapolate)
+      if (any(c1, c2, c3)){
+        x <- response(x, variable, data = data, new_data = new_data,
+                      extrapolate = extrapolate)
         return(x)
-      } else{
+
+      } else {
         return(NULL)
       }
     })
 
   response_out <- do.call(rbind, response_out)
-  limits <- range(model[[1]]$data[, variable])
+  limits <- range(data[, variable])
 
 
   x <- response_out[, variable]
@@ -238,6 +289,7 @@ response_curve_cons <- function(model, variable, n = 100, extrapolate = FALSE,
 
   ## Plotting curve
   # Create a list of arguments to pass to the plot function
+  if (is.null(xlab)) {xlab <- variable}
   plotcurve_args <- list(x = x,
                          y = y,
                          type = "n",
@@ -286,15 +338,14 @@ consensus_p <- function(predictions, weights = NULL){
         # Median
         c_media <- terra::app(predictions, median)
 
+        # Variance
+        c_var <- terra::app(predictions, var)
+
         # Weighted average
         c_wmean <- terra::app(predictions*weights, sum)
 
-        # Variance between the consensus predictions
-        c_var <- terra::app(c(c_mean, c_media, c_wmean), var)
-
-        cons <- c(c_mean, c_media, c_wmean, c_var)
-        names(cons) <- c("Mean", "Median", "Weighted_average",
-                         "Consensus_variance")
+        cons <- c(c_mean, c_media, c_var, c_wmean)
+        names(cons) <- c("Mean", "Median", "Variance", "Weighted_average")
     }
   } else {
 
@@ -351,4 +402,19 @@ save_cal <- function(x, out_dir) {
 
 
 }
+
+#-------------------------------------------------------------------------------
+# Aux functions to show executing time as hours, minutes and seconds.
+format_time <- function(x){
+  # formatting time
+  hs <- as.numeric(x) %/% 3600
+  ms <- (as.numeric(x) %% 3600) %/% 60
+  ss<- as.numeric(x) %% 60
+
+  # Time running message
+  m <- sprintf("\nExecution time: %1.f hours, %1.f minutes and %.2f seconds",
+               hs, ms, ss)
+  message(m)
+}
+
 

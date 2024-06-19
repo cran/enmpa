@@ -25,8 +25,7 @@ Default = NULL.}
 \value{
 A list of fitted GLMs.
 
-For \code{fit_selected}, the data.frame with results from model evaluation for
-selected models is added.
+For \code{fit_selected}, an enmpa \verb{fitted models} object.
 }
 \description{
 Functions to facilitate fitting multiple GLMs.
@@ -47,5 +46,5 @@ forms <- c("Sp ~ bio_1 + I(bio_1^2) + I(bio_12^2)",
 # Fitting models
 fits <- fit_glms(forms, data = cal_res$data)
 
-fits$Model_ID_1
+fits$ModelID_1
 }

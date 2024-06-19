@@ -2,6 +2,7 @@ enmpa: Ecological Niche Modeling for Presence-absence Data
 ================
 Luis F. Arias-Giraldo, Marlon E. Cobos, A. Townsend Peterson
 
+- [Package description](#package-description)
 - [Installation](#installation)
 - [Packages required](#packages-required)
 - [Example data](#example-data)
@@ -15,34 +16,36 @@ Luis F. Arias-Giraldo, Marlon E. Cobos, A. Townsend Peterson
   - [Consensus models](#consensus-models)
   - [Response Curves](#response-curves)
   - [Variable importance](#variable-importance)
-  - [Model evaluation with independent
-    data](#model-evaluation-with-independent-data)
+  - [Final model evaluation with independent
+    data](#final-model-evaluation-with-independent-data)
   - [Literature](#literature)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/Luisagi/enmpa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Luisagi/enmpa/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
+
+<img src="man/figures/enmpa_logo_100dpi.png" align="right" width="166"/></a>
 
 <hr>
 
-`enmpa` is an r package that contains a set of tools to perform
+## Package description
+
+`enmpa` is an R package that contains a set of tools to perform
 Ecological Niche Modeling using presence-absence data. Some of the main
 functions help perform data partitioning, model calibration, model
 selection, variable response exploration, and model projection.
 
 <br>
 
+<hr>
+
 ## Installation
 
 You can install the development version of `enmpa` from
 [GitHub](https://github.com/Luisagi/enmpa) with:
-
-``` r
-# install.packages("remotes")
-remotes::install_github("Luisagi/enmpa")
-```
 
 <br>
 
@@ -211,36 +214,50 @@ Now lets run an example of model calibration and selection:
 
 ``` r
 # Linear + quadratic + products responses
-cal_res <- calibration_glm(data = enm_data, dependent = "Sp",
-                           independent = c("bio_1", "bio_12"),
-                           response_type = "lpq", formula_mode = "intensive", 
-                           exclude_bimodal = TRUE, selection_criterion = "TSS",
-                           cv_kfolds = 5, verbose = FALSE)
+calibration <- calibration_glm(data = enm_data, dependent = "Sp",
+                               independent = c("bio_1", "bio_12"),
+                               response_type = "lpq",
+                               formula_mode = "intensive", 
+                               exclude_bimodal = TRUE, 
+                               selection_criterion = "TSS",
+                               cv_kfolds = 5, verbose = FALSE)
+calibration
+#> enmpa-class `enmpa_calibration`:
+#> $selected             : Selected models (N = 2)
+#> $summary              : A summary of statistics for all models. 
+#> $calibration_results  : Results obtained from cross-validation for all models. 
+#> $data                 : Data used for calibration. 
+#> $partitioned_data     : k-fold indexes (k = 5)
+#> $weights              : Use of weights (FALSE)
 ```
 
 Process results:
 
 ``` r
-## Two models were selected out of 31 models evaluated
-cal_res$selected[, 1]  # Selected models
-#> [1] "ModelID_29" "ModelID_31"
+## Summary of the calibrationm
+summary(calibration)
+#> 
+#>                      Summary of enmpa_calibration                  
+#> -------------------------------------------------------------------
+#> 
+#> Number of selected models: 2
+#> Number of partitions: (k = 5)
+#> Weights used: No
+#> Summary of selected models (threshold criteria =  maxTSS ):
+#>      ModelID ROC_AUC_mean Accuracy_mean Specificity_mean Sensitivity_mean
+#> 1 ModelID_29       0.9003        0.8274           0.8245            0.858
+#> 2 ModelID_31       0.9002        0.8305           0.8280            0.856
+#>   TSS_mean AIC_weight
+#> 1   0.6825  0.3751818
+#> 2   0.6840  0.6248182
+```
 
-cal_res$selected  # Metrics of evaluation
+``` r
+## Two models were selected out of 31 models evaluated
+calibration$selected[, 1:2]  # Selected models
 #>      ModelID                                                      Formulas
 #> 1 ModelID_29          Sp ~ bio_1 + I(bio_1^2) + I(bio_12^2) + bio_1:bio_12
 #> 2 ModelID_31 Sp ~ bio_1 + bio_12 + I(bio_1^2) + I(bio_12^2) + bio_1:bio_12
-#>   Threshold_criteria Threshold_mean Threshold_sd ROC_AUC_mean ROC_AUC_sd
-#> 1             maxTSS         0.0951       0.0166       0.9003     0.0190
-#> 2             maxTSS         0.0991       0.0154       0.9002     0.0192
-#>   False_positive_rate_mean False_positive_rate_sd Accuracy_mean Accuracy_sd
-#> 1                   0.1755                 0.0259        0.8274      0.0232
-#> 2                   0.1720                 0.0216        0.8305      0.0198
-#>   Sensitivity_mean Sensitivity_sd Specificity_mean Specificity_sd TSS_mean
-#> 1            0.858         0.0363           0.8245         0.0259   0.6825
-#> 2            0.856         0.0404           0.8280         0.0216   0.6840
-#>   TSS_sd Parameters     AIC Delta_AIC AIC_weight Concave_responses
-#> 1 0.0404          4 2186.70    1.0201  0.3751818                  
-#> 2 0.0450          5 2185.68    0.0000  0.6248182
 ```
 
 <br>
@@ -249,17 +266,25 @@ cal_res$selected  # Metrics of evaluation
 
 After one or more models are selected, the next steps are the fitting
 and projection of these models. In this case we are projecting the
-models to the whole area of interest.
+models to the whole area of interest. Models can be transferred with
+three options: free extrapolation (‘E’), extrapolation with clamping
+(‘EC’), and no extrapolation (‘NE’).
 
 ``` r
-# Fitting
-f_models <- fit_selected(cal_res)
+# Fitting selected models
+fits <- fit_selected(calibration)
 
 # Prediction for the two selected models and their consensus
-preds <- predict_selected(f_models, newdata = env_vars, consensus = TRUE)
+preds_E  <- predict_selected(fits, newdata = env_vars, extrapolation_type = "E",
+                             consensus = TRUE)
+preds_NE <- predict_selected(fits, newdata = env_vars,extrapolation_type = "NE",
+                             consensus = TRUE)
 
 # Visualization
-plot(preds$predictions, mar = c(1, 1, 2, 4))
+plot(c(preds_E$predictions,preds_NE$predictions),
+     main = c("Model ID 29 (E)", "Model ID 31 (E)",
+              "Model ID 29 (NE)", "Model ID 29 (NE)"),
+     mar = c(1, 1, 2, 5))
 ```
 
 <img src="man/figures/README-figures-prediction_selected-1.png" width="100%" />
@@ -279,7 +304,7 @@ using the mean, median, and a weighted average (using Akaike weights)
 
 ``` r
 # Consensus projections
-plot(preds$consensus, mar = c(1, 1, 2, 5))
+plot(preds_E$consensus, mar = c(1, 1, 2, 5))
 ```
 
 <img src="man/figures/README-figures-consensus-1.png" width="100%" />
@@ -294,23 +319,44 @@ code help to do so:
 
 ``` r
 # Response Curves for Bio_1 and Bio_2, first selected model 
-response_curve(f_models$ModelID_29, variable = "bio_1")
-
-response_curve(f_models$ModelID_29, variable = "bio_12")
+response_curve(fitted = fits, modelID = "ModelID_29", variable = "bio_1")
+response_curve(fitted = fits, modelID = "ModelID_29", variable = "bio_12")
 ```
 
 <img src="man/figures/README-figures-rcurve_model_ID_1-1.png" width="50%" /><img src="man/figures/README-figures-rcurve_model_ID_1-2.png" width="50%" />
 
 ``` r
 # Consensus Response Curves for Bio_1 and Bio_2, for both models 
-response_curve(f_models, variable = "bio_1")
-
-response_curve(f_models, variable = "bio_12")
+response_curve(fits, variable = "bio_1")
+response_curve(fits, variable = "bio_12")
 ```
 
 <img src="man/figures/README-figures-rcurve_consensus-1.png" width="50%" /><img src="man/figures/README-figures-rcurve_consensus-2.png" width="50%" />
 
-<br>
+<!-- ### Two-way interactions -->
+<!-- It is useful to examine whether the effect of one variable depends on the level -->
+<!-- of other variables. If it does, then we have what is called an 'interaction'. -->
+<!-- According to the calibration results from this example, in both models, the -->
+<!-- predictor `bio_1:bio_12` was selected. To explore the interaction of these two -->
+<!-- variables, the function `resp2var` can help us to visualize this interaction. -->
+<!-- ```{r figures-rcurve_two, fig.show="hold", out.width="50%", cache=TRUE} -->
+<!-- # Consensus Response Curves for Bio_1 and Bio_2, for both models -->
+<!-- resp2var(model = fits, -->
+<!--          modelID = "ModelID_29", -->
+<!--          main = "ModelID 29", -->
+<!--          variable1 = "bio_1", -->
+<!--          variable2 = "bio_12", -->
+<!--          extrapolate = TRUE, -->
+<!--          add_limits = TRUE) -->
+<!-- resp2var(model = fits, -->
+<!--          modelID = "ModelID_31", -->
+<!--          main = "ModelID 31", -->
+<!--          variable1 = "bio_1", -->
+<!--          variable2 = "bio_12", -->
+<!--          extrapolate = TRUE, -->
+<!--          add_limits = TRUE) -->
+<!-- ``` -->
+<!-- <br> -->
 
 ### Variable importance
 
@@ -320,7 +366,7 @@ function of the relative deviance explained by each predictor.
 Analysis of Deviance for the first selected model:
 
 ``` r
-anova(f_models$ModelID_29, test = "Chi")
+anova(fits$glms_fitted$ModelID_29, test = "Chi")
 #> Analysis of Deviance Table
 #> 
 #> Model: binomial, link: logit
@@ -345,7 +391,7 @@ in terms of contribution.
 
 ``` r
 # Relative contribution of the deviance explained for the first model
-var_importance(f_models$ModelID_29)
+var_importance(fitted = fits, modelID = "ModelID_29")
 #>      predictor contribution cum_contribution
 #> 3  I(bio_12^2)    0.3572673        0.3572673
 #> 1        bio_1    0.2919587        0.6492259
@@ -358,7 +404,7 @@ the two models together which can help with the interpretations:
 
 ``` r
 # Relative contribution of the deviance explained
-vi_both_models <- var_importance(f_models)
+vi_both_models <- var_importance(fits)
 ```
 
 ``` r
@@ -368,42 +414,99 @@ plot_importance(vi_both_models, extra_info = TRUE)
 
 <img src="man/figures/README-figures-var_importance-1.png" width="70%" />
 
-### Model evaluation with independent data
+<!-- The Jackknife function providing a detailed reflection of the impact of each -->
+<!-- variable on the overall model, considering four difference measures: ROC-AUC, -->
+<!-- TSS, AICc, and Deviance. -->
+<!-- ```{r warning=FALSE} -->
+<!-- # Jackknife test -->
+<!-- jk <- jackknife(data = enm_data, -->
+<!--           dependent = "Sp", -->
+<!--           independent = c("bio_1", "bio_12"), -->
+<!--           response_type = "lpq") -->
+<!-- jk -->
+<!-- ``` -->
+<!-- ```{r warning=FALSE, cache=TRUE, figures-jackk, fig.show="hold", , fig.height=4, fig.width=7.5,out.width="50%"} -->
+<!-- # Jackknife plots -->
+<!-- plot_jk(jk, metric = "TSS") -->
+<!-- plot_jk(jk, metric = "AIC") -->
+<!-- plot_jk(jk, metric = "ROC_AUC") -->
+<!-- plot_jk(jk, metric = "Deviance") -->
+<!-- ``` -->
+
+### Final model evaluation with independent data
 
 Finally, we will evaluate the final models using the “independent_eval”
 functions. Ideally, the model should be evaluated with an independent
 data set (i.e., data that was not used during model calibration or for
 final model fitting).
 
-#### Evaluation using presence-absence data.
+``` r
+# Loading an independent dataset
+data("test", package = "enmpa")
+
+# The independent evaluation data are divided into two groups: 
+# presences-absences (test_01) and presences-only (test_1).
+test_1  <- test[test$Sp == 1,]
+test_01 <- test
+
+head(test_1)
+#>    Sp       lon      lat
+#> 4   1 -117.5543 33.62975
+#> 8   1 -100.9363 38.68424
+#> 19  1 -110.4748 37.78367
+#> 53  1 -106.2348 31.70118
+#> 54  1 -112.3623 39.35173
+#> 60  1 -109.3399 38.26670
+head(test_01)
+#>   Sp       lon      lat
+#> 1  0 -105.6639 35.81247
+#> 2  0 -107.9354 33.37200
+#> 3  0 -100.3134 48.96018
+#> 4  1 -117.5543 33.62975
+#> 5  0 -120.6168 36.59670
+#> 6  0 -105.3379 40.08928
+```
+
+#### Using presence-absence data.
 
 Using independent data for which presence and absence is known can give
 the most robust results. Here an example:
 
 ``` r
-# In this example, we will use the final model calculated as the weighted 
-# average of the two selected models.
-wmean <- preds$consensus$Weighted_average
+projections <- list(
+  ModelID_29 = preds_E$predictions$ModelID_29,
+  ModelID_31 = preds_E$predictions$ModelID_31,
+  Consensus_WA = preds_E$consensus$Weighted_average
+)
 
-# check the test data
-head(test, 10)
-#>    Sp       lon      lat
-#> 1   0 -105.6639 35.81247
-#> 2   0 -107.9354 33.37200
-#> 3   0 -100.3134 48.96018
-#> 4   1 -117.5543 33.62975
-#> 5   0 -120.6168 36.59670
-#> 6   0 -105.3379 40.08928
-#> 7   0 -115.4178 40.65446
-#> 8   1 -100.9363 38.68424
-#> 9   0 -119.2357 37.23158
-#> 10  0 -118.8269 38.62374
+ie_01 <- lapply(projections, function(x){
+  independent_eval01(prediction = x,
+                     observation = test_01$Sp,
+                     lon_lat = test_01[, c("lon", "lat")])
+})
 
-# independent evaluation
-eval <- independent_eval01(prediction = wmean, observation = test$Sp, 
-                           lon_lat = test[, 2:3])
-
-eval
+ie_01
+#> $ModelID_29
+#>     Threshold_criteria Threshold   ROC_AUC False_positive_rate Accuracy
+#> 204                ESS 0.1365298 0.9570991          0.08988764     0.91
+#> 175             maxTSS 0.1170256 0.9570991          0.10112360     0.91
+#> 196              SEN90 0.1311493 0.9570991          0.10112360     0.90
+#>     Sensitivity Specificity       TSS
+#> 204   0.9090909   0.9101124 0.8192033
+#> 175   1.0000000   0.8988764 0.8988764
+#> 196   0.9090909   0.8988764 0.8079673
+#> 
+#> $ModelID_31
+#>     Threshold_criteria Threshold   ROC_AUC False_positive_rate Accuracy
+#> 239                ESS 0.1579818 0.9570991          0.08988764     0.91
+#> 205             maxTSS 0.1354130 0.9570991          0.10112360     0.91
+#> 218              SEN90 0.1440422 0.9570991          0.10112360     0.90
+#>     Sensitivity Specificity       TSS
+#> 239   0.9090909   0.9101124 0.8192033
+#> 205   1.0000000   0.8988764 0.8988764
+#> 218   0.9090909   0.8988764 0.8079673
+#> 
+#> $Consensus_WA
 #>     Threshold_criteria Threshold   ROC_AUC False_positive_rate Accuracy
 #> 226                ESS 0.1500930 0.9570991          0.08988764     0.91
 #> 192             maxTSS 0.1274123 0.9570991          0.10112360     0.91
@@ -424,24 +527,39 @@ can use any of the three threshold values obtained above: ESS, maxTSS or
 SEN90.
 
 ``` r
-# Threshold based in criteria: Sensitivity = 90%
-th <- eval[3, "Threshold"]   
+# In this example, we will use the weighted average of the two selected models.
 
-# Keep only presence records
-test_p <- test[test$Sp == 1,]
+# Consensus_WA
+Consensus_WA_T1 <- ie_01[["Consensus_WA"]][1, "Threshold"] # ESS
+Consensus_WA_T2 <- ie_01[["Consensus_WA"]][2, "Threshold"] # maxTSS
+Consensus_WA_T3 <- ie_01[["Consensus_WA"]][3, "Threshold"] # SEN90
 
-# independent evaluation 
-eval2 <- independent_eval1(prediction = wmean, threshold = th, 
-                           lon_lat = test_p[, 2:3])
+aux_list <- list(ESS = Consensus_WA_T1, maxTSS = Consensus_WA_T2,
+                  SEN90 = Consensus_WA_T3)
 
-eval2
+lapply(aux_list, function(th){
+  independent_eval1(prediction = projections[["Consensus_WA"]],
+                    threshold = th,
+                    lon_lat = test_1[, c("lon", "lat")])
+  
+})
+#> $ESS
 #>   omission_error threshold Mean_AUC_ratio pval_pROC
-#> 1     0.09090909 0.1394197       1.634595         0
+#> 1     0.09090909  0.150093       1.634595         0
+#> 
+#> $maxTSS
+#>   omission_error threshold Mean_AUC_ratio pval_pROC
+#> 1              0 0.1274123        1.63588         0
+#> 
+#> $SEN90
+#>   omission_error threshold Mean_AUC_ratio pval_pROC
+#> 1     0.09090909 0.1394197       1.632866         0
 ```
 
 ### Literature
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-akaike1973" class="csl-entry">
 
