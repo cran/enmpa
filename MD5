@@ -1,6 +1,6 @@
-66bb306f0656bd79b25827ce405b39d5 *DESCRIPTION
+c9dc87095adf394fc9d1993c00bcf330 *DESCRIPTION
 f26b529c143d78e0e452712174aaa940 *NAMESPACE
-cc8af4aa30d47302c0de898ba13cbbf3 *NEWS.md
+934ca5af556168970a5d4e951b6af656 *NEWS.md
 423ec27de4964a6b7e02222d4ef99dfe *R/Classes.R
 0863d3c6e1be1d4d21f69ca3e7965425 *R/Methods.R
 4cc254872c70f4054d0ec2ac8574e87c *R/RcppExports.R
@@ -17,9 +17,9 @@ f14927766993153124c7691b46ec54cb *R/kfold_partition.R
 b730c6063659123d8a71b7d9693ea6ce *R/model_validation.R
 459e2b495a5d057bb2d36cfb1eddee1f *R/niche_signal.R
 c10b402980df4f1a6dfd7a19416fecfb *R/optimize_metrics.R
-ce85b06fb95bba2055c4a5ed562babb9 *R/plot_importance.R
+1b0d8e12ede4620d07d5131e0144dbb8 *R/plot_importance.R
 3e78a1eb71d4fa5ff2a3c8cb6bf1be24 *R/plot_jk.R
-f46a7970d0872a44fe67c3a2ff8c350d *R/plot_niche_signal.R
+7b2617e146cd7fff58bbdb0d33c4cac1 *R/plot_niche_signal.R
 3a11d55b8890b4458a082bd3f2212e3e *R/predict_glm.R
 15adc8215e4b546999839ccfc8591587 *R/predict_selected.R
 e6b028b47e88253d1eb796b762e4f63c *R/proc.R
