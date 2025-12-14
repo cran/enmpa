@@ -1,6 +1,6 @@
-c9dc87095adf394fc9d1993c00bcf330 *DESCRIPTION
+0728d7a865d7bc63ce690c2ec9468f82 *DESCRIPTION
 f26b529c143d78e0e452712174aaa940 *NAMESPACE
-934ca5af556168970a5d4e951b6af656 *NEWS.md
+05ea11f1dc64d320dac689c65917c680 *NEWS.md
 423ec27de4964a6b7e02222d4ef99dfe *R/Classes.R
 0863d3c6e1be1d4d21f69ca3e7965425 *R/Methods.R
 4cc254872c70f4054d0ec2ac8574e87c *R/RcppExports.R
@@ -24,9 +24,9 @@ c10b402980df4f1a6dfd7a19416fecfb *R/optimize_metrics.R
 15adc8215e4b546999839ccfc8591587 *R/predict_selected.R
 e6b028b47e88253d1eb796b762e4f63c *R/proc.R
 0055ec628c22cc8070772ae9c2851920 *R/resp2var.R
-9daa9e2ca751815274d41283397f7e7b *R/response_curve.R
+9c29e9ef84bcf066815b9da3f1860cb5 *R/response_curve.R
 be25c721066257dc3d32f2a24a580953 *R/selection_helpers.R
-6676a5777e4ee7500992fffc81c71967 *R/short_helpers.R
+c375a9fb2219611f394227476df6f20a *R/short_helpers.R
 71855d62107bcbc5a5611159a16496ad *R/var_importance.R
 fc83577fa5d56d825319e81b98fe9fa6 *README.md
 28fdbbd2031aa4b0edbcb97bf374523b *data/cal_res.rda
@@ -81,7 +81,7 @@ dc559236e919a0cf1bc850b20441a3cc *man/niche_signal.Rd
 242a92d316fcf2b77b23b450030ffa6c *man/print.Rd
 7c02f96e898587e33669bf155ad60a23 *man/proc_enm.Rd
 e78996c1dcb73ef2ac21b40c3e74d132 *man/resp2var.Rd
-7bc15904c353bd66d229b3253e189096 *man/response_curve.Rd
+0dcd17513e379e0941b89a36d7381554 *man/response_curve.Rd
 e2e0589e728c5ce3f272026cd2425630 *man/sel_fit.Rd
 2764e5c4bc2ab8f7538fd9f5c5312362 *man/summary.Rd
 52f0210726e60d4b59844c9582013268 *man/test.Rd
