@@ -1,6 +1,6 @@
-0728d7a865d7bc63ce690c2ec9468f82 *DESCRIPTION
+08966bb1c91fa3276b0ef0a801f0376b *DESCRIPTION
 f26b529c143d78e0e452712174aaa940 *NAMESPACE
-05ea11f1dc64d320dac689c65917c680 *NEWS.md
+6cbe325f8ebeac2c415eb60339b0dbc1 *NEWS.md
 423ec27de4964a6b7e02222d4ef99dfe *R/Classes.R
 0863d3c6e1be1d4d21f69ca3e7965425 *R/Methods.R
 4cc254872c70f4054d0ec2ac8574e87c *R/RcppExports.R
@@ -21,7 +21,7 @@ c10b402980df4f1a6dfd7a19416fecfb *R/optimize_metrics.R
 3e78a1eb71d4fa5ff2a3c8cb6bf1be24 *R/plot_jk.R
 7b2617e146cd7fff58bbdb0d33c4cac1 *R/plot_niche_signal.R
 3a11d55b8890b4458a082bd3f2212e3e *R/predict_glm.R
-15adc8215e4b546999839ccfc8591587 *R/predict_selected.R
+57e30724d6242f4233534c0f17b481b7 *R/predict_selected.R
 e6b028b47e88253d1eb796b762e4f63c *R/proc.R
 0055ec628c22cc8070772ae9c2851920 *R/resp2var.R
 9c29e9ef84bcf066815b9da3f1860cb5 *R/response_curve.R
@@ -86,8 +86,8 @@ e2e0589e728c5ce3f272026cd2425630 *man/sel_fit.Rd
 2764e5c4bc2ab8f7538fd9f5c5312362 *man/summary.Rd
 52f0210726e60d4b59844c9582013268 *man/test.Rd
 6c6cc28c049a27378682fc7de74bd86a *man/var_importance.Rd
-c6ce9ce33964d4e57660a73fc11b01aa *src/Makevars.in
-8832327cf48e28e34b2c508d5a98d455 *src/Makevars.ucrt
-1d994757359aff4a77bb95deb78d752b *src/Makevars.win
+4297ef809d6fc69e4fdc4158e1fe7f32 *src/Makevars.in
+781bdc59a16203c89fb2d2657a5fb70d *src/Makevars.ucrt
+451d218605d467bda07cb23bcfc4d0cb *src/Makevars.win
 e0530e7ec3f68d27e976e9e08cbbc464 *src/RcppExports.cpp
 25d511dca050eb4b5fae0dcdbadae0b8 *src/trap_roc.cpp
