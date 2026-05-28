@@ -1,6 +1,6 @@
-08966bb1c91fa3276b0ef0a801f0376b *DESCRIPTION
+dfed8ba53e197317e389d6b6f330a696 *DESCRIPTION
 f26b529c143d78e0e452712174aaa940 *NAMESPACE
-6cbe325f8ebeac2c415eb60339b0dbc1 *NEWS.md
+9e2ef0468bd51d148fe3f99fe785ba94 *NEWS.md
 423ec27de4964a6b7e02222d4ef99dfe *R/Classes.R
 0863d3c6e1be1d4d21f69ca3e7965425 *R/Methods.R
 4cc254872c70f4054d0ec2ac8574e87c *R/RcppExports.R
@@ -38,7 +38,7 @@ a998e5d680df69ce77fddffa7672a37d *data/test.rda
 30bcb1277773e00cc4823be85f64b85c *man/cal_res.Rd
 b416f34a2282b8dcf6ef3dacddd1ca31 *man/calibration_glm.Rd
 9eae740684d461282ed00beee9040a02 *man/enm_data.Rd
-069075f3f16f33e64e4d312c7a3032ca *man/enmpa.Rd
+3331fdcc75b8bc8fc2a31383b5c88b31 *man/enmpa.Rd
 dd2eb9bf04db4d36abbacf28d5e7af60 *man/enmpa_calibration.Rd
 66928b1dfce5a6c58c6392ccb57c8bc9 *man/enmpa_fitted_models.Rd
 448bdc2f9cb587ea68f77ac44c853d7d *man/evaluation_stats.Rd
@@ -90,4 +90,4 @@ e2e0589e728c5ce3f272026cd2425630 *man/sel_fit.Rd
 781bdc59a16203c89fb2d2657a5fb70d *src/Makevars.ucrt
 451d218605d467bda07cb23bcfc4d0cb *src/Makevars.win
 e0530e7ec3f68d27e976e9e08cbbc464 *src/RcppExports.cpp
-25d511dca050eb4b5fae0dcdbadae0b8 *src/trap_roc.cpp
+2ee32ffcb8d881f20059de5074cf446d *src/trap_roc.cpp
