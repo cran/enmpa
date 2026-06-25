@@ -1,6 +1,6 @@
-dfed8ba53e197317e389d6b6f330a696 *DESCRIPTION
+25d517ce3e914d562ef7c2a2607feb17 *DESCRIPTION
 f26b529c143d78e0e452712174aaa940 *NAMESPACE
-9e2ef0468bd51d148fe3f99fe785ba94 *NEWS.md
+d9e4a6cfa4b6a2cdf23654c730cfe81b *NEWS.md
 423ec27de4964a6b7e02222d4ef99dfe *R/Classes.R
 0863d3c6e1be1d4d21f69ca3e7965425 *R/Methods.R
 4cc254872c70f4054d0ec2ac8574e87c *R/RcppExports.R
@@ -26,7 +26,7 @@ e6b028b47e88253d1eb796b762e4f63c *R/proc.R
 0055ec628c22cc8070772ae9c2851920 *R/resp2var.R
 9c29e9ef84bcf066815b9da3f1860cb5 *R/response_curve.R
 be25c721066257dc3d32f2a24a580953 *R/selection_helpers.R
-c375a9fb2219611f394227476df6f20a *R/short_helpers.R
+9f0d30cbf9e739d6f97554524403f05c *R/short_helpers.R
 71855d62107bcbc5a5611159a16496ad *R/var_importance.R
 fc83577fa5d56d825319e81b98fe9fa6 *README.md
 28fdbbd2031aa4b0edbcb97bf374523b *data/cal_res.rda
